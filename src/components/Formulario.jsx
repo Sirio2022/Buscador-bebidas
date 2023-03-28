@@ -1,10 +1,34 @@
-import { Button, Form, Row, Col } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Button, Form, Row, Col, Alert } from 'react-bootstrap';
 import useCategorias from '../hooks/useCategorias';
+import useBebidas from '../hooks/useBebidas';
 
 export default function Formulario() {
+  const [busqueda, setBusqueda] = useState({
+    nombre: '',
+    categoria: '',
+  });
+
+  const [alerta, setAlerta] = useState('');
+
   const { categorias } = useCategorias();
+  const { consultarBebidas } = useBebidas();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (Object.values(busqueda).includes('')) {
+      setAlerta('Todos los campos son obligatorios');
+      return;
+    }
+    setAlerta('');
+
+    consultarBebidas(busqueda);
+  };
+
   return (
-    <Form>
+    <Form onSubmit={handleSubmit}>
+      {alerta && <Alert variant="danger">{alerta}</Alert>}
       <Row>
         <Col md={6}>
           <Form.Group className="mb-3">
@@ -14,15 +38,27 @@ export default function Formulario() {
               type="text"
               placeholder="Ej. Margarita"
               name="nombre"
+              value={busqueda.nombre}
+              onChange={(e) =>
+                setBusqueda({ ...busqueda, [e.target.name]: e.target.value })
+              }
             />
           </Form.Group>
         </Col>
+
         <Col md={6}>
           <Form.Group className="mb-3">
             <Form.Label htmlFor="categoria">
               Selecciona una Categoría
             </Form.Label>
-            <Form.Select id="categoria" name="categoria">
+            <Form.Select
+              id="categoria"
+              name="categoria"
+              value={busqueda.categoria}
+              onChange={(e) =>
+                setBusqueda({ ...busqueda, [e.target.name]: e.target.value })
+              }
+            >
               <option value="">-- Selecciona categoría --</option>
               {categorias.map((categoria) => (
                 <option
@@ -37,12 +73,13 @@ export default function Formulario() {
         </Col>
       </Row>
 
-      <Row className='justify-content-end'>
+      <Row className="justify-content-end">
         <Col md={3}>
-          <Button 
-          className='text-uppercase w-100'
-          variant="danger" 
-          type="submit">
+          <Button
+            className="text-uppercase w-100"
+            variant="danger"
+            type="submit"
+          >
             Buscar Bebidas
           </Button>
         </Col>
